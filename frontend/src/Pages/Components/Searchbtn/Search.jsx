@@ -103,94 +103,36 @@ function Search() {
     console.log(res);
 
     if(res.statusCode === 200){
-
-    const data = await fetch(`/api/payment/course/${id}/${courseName}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ fees: price[courseName]*100 }),
-    });
-
-    const DATA = await data.json();
-    // console.log(DATA.data.id)
-
-    const Key = await fetch("/api/payment/razorkey", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const response = await Key.json();
-
-    const options = {
-      key: response.data.key,
-      amount: price[courseName]*100,
-      currency: "INR",
-      name: "Shiksharthee",
-      description: "Enroll in a course",
-      image: logo,
-      order_id: DATA.data.id, // Include the order_id from the response
-      handler: async (response) => {
-        const { razorpay_payment_id, razorpay_order_id, razorpay_signature } =
-          response;
-
-        // Send the payment details to the server for verification
-        const verificationData = {
-          razorpay_payment_id,
-          razorpay_order_id,
-          razorpay_signature,
+      // Create payment request instead of direct payment
+      try {
+        const paymentRequestData = {
+          courseID: id,
+          courseName: courseName,
+          amount: price[courseName]
         };
 
-        const verificationResponse = await fetch(
-          `/api/payment/confirmation/course/${id}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(verificationData),
-          }
-        );
+        const response = await fetch('/api/payment-request/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(paymentRequestData)
+        });
 
-        const res = await verificationResponse.json();
-        console.log(res.statusCode);
-        if (res.statusCode === 200) {
-          try {
-            let response = await fetch(
-              `/api/course/${courseName}/${id}/add/student/${ID}`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                // body: JSON.stringify({}),
-              }
-            );
-
-            let res = await response.json();
-            console.log(res);
-            setPopup(true);
-          } catch (error) {
-            console.log(error);
-          }
+        const result = await response.json();
+        
+        if (result.statusCode === 201) {
+          // Show WhatsApp contact information
+          alert(`Payment request created successfully!\n\nTo complete your enrollment:\n1. Contact admin via WhatsApp: +252 61 9122271\n2. Make payment for ${courseName} course (Rs. ${price[courseName]})\n3. Admin will approve your enrollment after payment confirmation\n\nYour request ID: ${result.data._id}`);
+          setPopup(true);
+        } else {
+          alert(result.message || 'Failed to create payment request');
         }
-      },
-      prefill: {
-        name: "Gaurav Kumar",
-        email: "gaurav.kumar@example.com",
-      },
-      notes: {
-        address: "Razorpay Corporate Office",
-      },
-      theme: {
-        color: "#3399cc",
-      },
-    };
-
-    const rzp1 = new window.Razorpay(options);
-    rzp1.open();
-    }else{
+      } catch (error) {
+        console.log(error);
+        alert('Error creating payment request. Please try again.');
+      }
+    } else {
       alert(res.message)
     }
   };

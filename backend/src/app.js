@@ -29,4 +29,8 @@ app.use("/api/admin", adminRouter);
 // import paymentRouter from "./routes/payment.routes.js"
 // app.use("/api/payment", paymentRouter)
 
+//payment request routes
+import paymentRequestRouter from "./routes/paymentRequest.routes.js";
+app.use("/api/payment-request", paymentRequestRouter);
+
 export { app };

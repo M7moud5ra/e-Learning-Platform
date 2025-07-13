@@ -1,5 +1,5 @@
 import {Router} from "express";
-import {signup, mailVerified, login,logout, addStudentDetails, getStudent, forgetPassword, resetPassword } from "../controllers/student.controller.js";
+import {signup, login,logout, addStudentDetails, getStudent, forgetPassword, resetPassword } from "../controllers/student.controller.js";
 import {upload} from "../middlewares/multer.middleware.js"
 import {authSTD} from "../middlewares/stdAuth.middleware.js"
 import { authSchema } from "../middlewares/joiLogin.middleware.js";
@@ -10,9 +10,7 @@ router.route("/signup").post(
     signup
 )
 
-router.route("/verify").get(
-    mailVerified
-)
+// Email verification route removed - server not deployed yet
 
 router.route("/login").post(
     authSchema, login

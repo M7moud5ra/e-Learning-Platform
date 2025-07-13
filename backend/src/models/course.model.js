@@ -12,6 +12,54 @@ description: {
     required: true
 },
 
+thumbnail: {
+    type: String, // URL or path to the thumbnail image
+    default: null
+},
+
+price: {
+    type: Number,
+    required: true,
+    default: 0
+},
+
+sections: [{
+    title: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        default: ''
+    },
+    videos: [{
+        title: {
+            type: String,
+            required: true
+        },
+        description: {
+            type: String,
+            default: ''
+        },
+        videoUrl: {
+            type: String,
+            required: true
+        },
+        duration: {
+            type: Number, // Duration in seconds
+            default: 0
+        },
+        order: {
+            type: Number,
+            default: 0
+        }
+    }],
+    order: {
+        type: Number,
+        default: 0
+    }
+}],
+
 isapproved: {
     type: Boolean,
     default: false

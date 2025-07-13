@@ -1,24 +1,25 @@
 import {asyncHandler} from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js";
 import { admin } from "../models/admin.model.js";
-import jwt from "jsonwebtoken";
 
 const authAdmin = asyncHandler(async(req,_,next) =>{
 
-    const accToken = req.cookies?.Accesstoken
+    const { username, password } = req.body;
 
-    if(!accToken) {
-        throw new ApiError(401, "unauthorized req")
+    if(!username || !password) {
+        throw new ApiError(401, "Username and password are required")
     }
 
-
-    const decodedAccToken = jwt.verify(accToken,
-        process.env.ACCESS_TOKEN_SECRET)
-
-    const Admin = await admin.findById(decodedAccToken?._id).select("-password -Refreshtoken")
+    const Admin = await admin.findOne({ username });
 
     if(!Admin){
-        throw new ApiError(401, "invalid access token")
+        throw new ApiError(401, "Invalid username or password")
+    }
+
+    const isPasswordValid = await Admin.isPasswordCorrect(password);
+
+    if(!isPasswordValid){
+        throw new ApiError(401, "Invalid username or password")
     }
 
     req.Admin = Admin

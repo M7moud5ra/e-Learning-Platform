@@ -2,58 +2,13 @@ import {asyncHandler} from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js";
 import {student, studentdocs} from "../models/student.model.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
-import nodemailer from "nodemailer";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Teacher } from "../models/teacher.model.js";
-import { Sendmail } from "../utils/Nodemailer.js";
+// Sendmail import removed - email verification disabled
 
 
 
-const verifyEmail = async (Email, Firstname, createdStudent_id) => {
-    try {
-        const emailsender = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false,
-            requireTLS: true,
-            auth: {
-                user: process.env.SMTP_EMAIL,
-                pass: process.env.SMTP_PASS,
-            }
-        });
-        // const mailOptions = {
-        //     from: "elearningsnu@gmail.com",
-        //     to: Email,
-        //     subject: "Verify your E-mail",
-        //     html: `<p> Hi ${Firstname}, Please click here to <a href="http://localhost:4400/api/student/verify?id=${createdStudent_id}">verify</a> your E-mail. </p>`
-        // };
-
-        const mailOptions = {
-            from: "elearningsnu@gmail.com",
-            to: Email,
-            subject: "Verify your E-mail",
-            html: `
-            <div style="text-align: center;">
-                <p style="margin: 20px;"> Hi ${Firstname}, Please click the button below to verify your E-mail. </p>
-                <img src="https://img.freepik.com/free-vector/illustration-e-mail-protection-concept-e-mail-envelope-with-file-document-attach-file-system-security-approved_1150-41788.jpg?size=626&ext=jpg&uid=R140292450&ga=GA1.1.553867909.1706200225&semt=ais" alt="Verification Image" style="width: 100%; height: auto;">
-                <br>
-                <a href="http://localhost:4400/api/student/verify?id=${createdStudent_id}">
-                    <button style="background-color: black; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 10px 0; cursor: pointer;">Verify Email</button>
-                </a>
-            </div>`
-        };
-
-        emailsender.sendMail(mailOptions, function(error) {
-            if (error) {
-                throw new ApiError(400, "Sending email verification failed");
-            } else {
-                console.log("Verification mail sent successfully");
-            }
-        });
-    } catch (error) {
-        throw new ApiError(400, "Failed to send email verification");
-    }
-};
+// Email verification removed - server not deployed yet
 
 const generateAccessAndRefreshTokens = async (stdID) =>{ 
     try {
@@ -108,6 +63,7 @@ const signup = asyncHandler(async (req, res) =>{
         Lastname,
         Password,
         Studentdetails:null,
+        Isverified: true, // Auto-verify since email verification is disabled
 
     })
 
@@ -119,32 +75,13 @@ const signup = asyncHandler(async (req, res) =>{
         throw new ApiError(501, "Student registration failed")
     }
     
-
-    await verifyEmail(Email, Firstname, newStudent._id);
-
     return res.status(200).json(
-        new ApiResponse(200, createdStudent, "Signup successfull")
+        new ApiResponse(200, createdStudent, "Signup successful - Email verification disabled")
     )
 
 })
 
-const mailVerified = asyncHandler(async(req,res)=>{
-        const id = req.query.id;
-
-        const updatedInfo = await student.updateOne({ _id: id }, { $set: { Isverified: true } });
-
-        if (updatedInfo.nModified === 0) {
-            throw new ApiError(404, "Student not found or already verified");
-        }
-        return res.send(`
-        <div style="text-align: center; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-            <img src="https://cdn-icons-png.flaticon.com/128/4436/4436481.png" alt="Verify Email Icon" style="width: 100px; height: 100px;">
-            <h1 style="font-size: 36px; font-weight: bold; padding: 20px;">Email Verified</h1>
-            <h4>Your email address was successfully verified.</h4>
-            <button style="padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; margin: 20px;" onclick="window.location.href = 'http://localhost:5173';">Go Back Home</button>
-        </div>
-        `);
-} )
+// mailVerified function removed - email verification disabled
 
 
 const login = asyncHandler(async(req,res) => {
@@ -165,9 +102,7 @@ const login = asyncHandler(async(req,res) => {
         throw new ApiError(400, "Student does not exist")
     }
 
-    if(!StdLogin.Isverified){
-        throw new ApiError(401, "Email is not verified");
-    }
+    // Email verification check removed - auto-verified during signup
 
     const StdPassCheck = await StdLogin.isPasswordCorrect(Password)
 
@@ -339,20 +274,13 @@ const forgetPassword=asyncHandler(async(req,res)=>{
    <p>Best regards,</p>
    <p>The Shiksharthee Team</p>`
 
-   try{
-    
-    await Sendmail(Email,subject,message);
-
-    res.status(200).json({
-
-        success:true,
-        message:`Reset password Email has been sent to ${Email} the email SuccessFully`
-     })
-
-    }catch(error){
-
-        throw new ApiError(404,"operation failed!!");
-    }
+   // Email sending removed - email verification disabled
+   // Password reset would require manual intervention or alternative method
+   
+   res.status(200).json({
+       success: true,
+       message: "Password reset functionality disabled - email verification not available"
+   })
 
 
 })

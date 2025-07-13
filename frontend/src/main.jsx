@@ -23,9 +23,12 @@ import StudentLayout from './Pages/Dashboard/StudentDashboard/StudentLayout'
 import SearchTeacher from './Pages/Dashboard/StudentDashboard/SearchTeacher'
 import StudentClasses from './Pages/Dashboard/StudentDashboard/StudentClasses'
 import StudentCourses from './Pages/Dashboard/StudentDashboard/StudentCourses'
+import PaymentStatus from './Pages/Dashboard/StudentDashboard/PaymentStatus'
+import CourseContent from './Pages/Dashboard/StudentDashboard/CourseContent'
 import DashboardTeacher from './Pages/Dashboard/TeacherDashboard/DashboardTeacher'
 import TeacherClasses from './Pages/Dashboard/TeacherDashboard/TeacherClasses'
 import TeacherCourses from './Pages/Dashboard/TeacherDashboard/TeacherCourses'
+import CourseManagement from './Pages/Dashboard/TeacherDashboard/CourseManagement'
 import SearchData from './Pages/Home/Search/Search'
 import ErrorPage from './Pages/ErrorPage/ErrorPage'
 import Forgetpassword from './Pages/ForgetPassword/Forgetpassword'
@@ -33,6 +36,7 @@ import ResetPassword from './Pages/ForgetPassword/ResetPassword'
 import { Toaster } from 'react-hot-toast'
 import ResetTeacher from './Pages/ForgetPassword/ResetTeacher'
 import Course from './Pages/Components/Admin/Course'
+import PaymentRequests from './Pages/Components/Admin/PaymentRequests'
 
 
 const router = createBrowserRouter(
@@ -55,16 +59,20 @@ const router = createBrowserRouter(
       <Route path='/pending' element={<Pending/>}/>
       <Route path='/admin/:data' element={<Admin/>}/>
       <Route path='/admin/course/:data' element={<Course/>}/>
+      <Route path='/admin/payment-requests/:data' element={<PaymentRequests/>}/>
       <Route path='/VarifyDoc/:type/:adminID/:ID' element={<VarifyDoc/>}/>
       <Route path='/Student/Dashboard/:ID' element={<StudentLayout/>}>
         <Route path='/Student/Dashboard/:ID/Search' element={<SearchTeacher/>}/>
         <Route path='/Student/Dashboard/:ID/Classes' element={<StudentClasses/>}/>
         <Route path='/Student/Dashboard/:ID/Courses' element={<StudentCourses/>}/>
+        <Route path='/Student/Dashboard/:ID/PaymentStatus' element={<PaymentStatus/>}/>
+        <Route path='/Student/Dashboard/:ID/CourseContent/:courseId' element={<CourseContent/>}/>
       </Route>
       <Route path='/Teacher/Dashboard/:ID' element={<TeacherLayout/>}>
         <Route path='/Teacher/Dashboard/:ID/Home' element={<DashboardTeacher/>}/>
         <Route path='/Teacher/Dashboard/:ID/Classes' element={<TeacherClasses/>}/>
         <Route path='/Teacher/Dashboard/:ID/Courses' element={<TeacherCourses/>}/>
+        <Route path='/Teacher/Dashboard/:ID/CourseManagement/:courseId' element={<CourseManagement/>}/>
       </Route>
 
       <Route path='/forgetPassword' element={<Forgetpassword/>}/>

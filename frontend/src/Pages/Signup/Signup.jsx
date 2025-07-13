@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./Styles.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import Images from "../Images/Grammar-correction.svg";
@@ -39,10 +39,8 @@ const Signup = () => {
       newErrors.email = 'Invalid email format';
     }
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    
-    if (!passwordRegex.test(Password)) {
-      newErrors.password = 'Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.';
+    if (Password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters long.';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -179,7 +177,7 @@ const Signup = () => {
         <img src={Images} alt="" className="imgs" />
       </div>
     </div>
-    <p className='text-sm text-red-400 absolute bottom-3 left-3'>* Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.</p>
+    <p className='text-sm text-red-400 absolute bottom-3 left-3'>* Password must be at least 8 characters long.</p>
     </>
   );
 };

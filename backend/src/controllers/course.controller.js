@@ -3,7 +3,7 @@ import {asyncHandler} from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js"; 
 import {ApiResponse} from "../utils/ApiResponse.js";
 import { Teacher } from "../models/teacher.model.js";
-import {Sendmail} from "../utils/Nodemailer.js"
+// Sendmail import removed - email verification disabled
 
 
 const getCourse = asyncHandler(async(req,res)=>{
@@ -56,7 +56,7 @@ const addCourseTeacher = asyncHandler(async(req,res)=>{
 
     
 
-    const{coursename,description, schedule} = req.body
+    const{coursename, description, schedule, thumbnail, price, sections} = req.body
 
     console.log(schedule)
 
@@ -67,6 +67,27 @@ const addCourseTeacher = asyncHandler(async(req,res)=>{
 
     if ([coursename,description].some((field) => field?.trim() === "")) {
       throw new ApiError(400, "All fields are required");
+    }
+
+    // Validate price
+    if(price !== undefined && (isNaN(price) || price < 0)){
+      throw new ApiError(400, "Price must be a valid positive number");
+    }
+
+    // Validate sections if provided
+    if(sections && sections.length > 0){
+      for(let section of sections){
+        if(!section.title || section.title.trim() === ""){
+          throw new ApiError(400, "Section title is required");
+        }
+        if(section.videos && section.videos.length > 0){
+          for(let video of section.videos){
+            if(!video.title || video.title.trim() === "" || !video.videoUrl || video.videoUrl.trim() === ""){
+              throw new ApiError(400, "Video title and URL are required");
+            }
+          }
+        }
+      }
     }
 
     const schedules = await course.aggregate([
@@ -109,6 +130,9 @@ const addCourseTeacher = asyncHandler(async(req,res)=>{
       coursename,
       description,
       schedule,
+      thumbnail: thumbnail || null,
+      price: price || 0,
+      sections: sections || [],
       enrolledteacher: loggedTeacher._id,
     })
 
@@ -217,19 +241,8 @@ const addCourseStudent = asyncHandler(async(req,res)=>{
       new: true
   })
 
-  await Sendmail(loggedStudent.Email, `Payment Confirmation for Course Purchase`, 
-    `<html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <h1 style="color: #4CAF50; text-align: center;">Payment Successful!</h1>
-        <p style="font-size: 16px; text-align: center;">Dear ${loggedStudent.Firstname},</p>
-        <p style="font-size: 16px; text-align: center;">We are pleased to inform you that your payment for the course has been successfully processed.</p>
-         <p style="font-size: 16px;">You can start accessing the course immediately by logging into your account.</p>
-        <p style="font-size: 16px;">Best regards,</p>
-        <p style="font-size: 16px;"><strong>The Shiksharthee Team</strong></p>
-        <p style="font-size: 14px;">&copy; 2024 Shiksharthee. All rights reserved.</p>
-        </body>
-    </html>`
-  )
+  // Payment confirmation email removed - email verification disabled
+  // await Sendmail(loggedStudent.Email, `Payment Confirmation for Course Purchase`, ...)
 
   return res
   .status(200)
@@ -522,7 +535,139 @@ const canStudentEnroll = asyncHandler(async(req,res)=>{
   return res.status(200).json(new ApiResponse(200, {}, "student can enroll"))
 })
 
-export {getCourse, getcourseTeacher, addCourseTeacher, addCourseStudent, enrolledcourseSTD, enrolledcourseTeacher, addClass, stdEnrolledCoursesClasses, teacherEnrolledCoursesClasses, canStudentEnroll} 
+// Add section to course
+const addSection = asyncHandler(async(req, res) => {
+  const { courseId } = req.params;
+  const { title, description, order } = req.body;
+  const loggedTeacher = req.teacher;
+
+  if(!title || title.trim() === ""){
+    throw new ApiError(400, "Section title is required");
+  }
+
+  const courseData = await course.findById(courseId);
+  if(!courseData){
+    throw new ApiError(404, "Course not found");
+  }
+
+  if(courseData.enrolledteacher.toString() !== loggedTeacher._id.toString()){
+    throw new ApiError(403, "Not authorized to modify this course");
+  }
+
+  const newSection = {
+    title,
+    description: description || '',
+    videos: [],
+    order: order || courseData.sections.length
+  };
+
+  const updatedCourse = await course.findByIdAndUpdate(
+    courseId,
+    { $push: { sections: newSection } },
+    { new: true }
+  );
+
+  return res.status(200).json(new ApiResponse(200, updatedCourse, "Section added successfully"));
+});
+
+// Add video to section
+const addVideoToSection = asyncHandler(async(req, res) => {
+  const { courseId, sectionId } = req.params;
+  const { title, description, videoUrl, duration, order } = req.body;
+  const loggedTeacher = req.teacher;
+
+  if(!title || title.trim() === "" || !videoUrl || videoUrl.trim() === ""){
+    throw new ApiError(400, "Video title and URL are required");
+  }
+
+  const courseData = await course.findById(courseId);
+  if(!courseData){
+    throw new ApiError(404, "Course not found");
+  }
+
+  if(courseData.enrolledteacher.toString() !== loggedTeacher._id.toString()){
+    throw new ApiError(403, "Not authorized to modify this course");
+  }
+
+  const sectionIndex = courseData.sections.findIndex(section => section._id.toString() === sectionId);
+  if(sectionIndex === -1){
+    throw new ApiError(404, "Section not found");
+  }
+
+  const newVideo = {
+    title,
+    description: description || '',
+    videoUrl,
+    duration: duration || 0,
+    order: order || courseData.sections[sectionIndex].videos.length
+  };
+
+  const updatedCourse = await course.findOneAndUpdate(
+    { _id: courseId, "sections._id": sectionId },
+    { $push: { "sections.$.videos": newVideo } },
+    { new: true }
+  );
+
+  return res.status(200).json(new ApiResponse(200, updatedCourse, "Video added successfully"));
+});
+
+// Get course with sections and videos (for enrolled students)
+const getCourseContent = asyncHandler(async(req, res) => {
+  const { courseId } = req.params;
+  const loggedStudent = req.Student;
+
+  const courseData = await course.findById(courseId).populate('enrolledteacher', 'Firstname Lastname');
+  if(!courseData){
+    throw new ApiError(404, "Course not found");
+  }
+
+  if(!courseData.isapproved){
+    throw new ApiError(403, "Course is not approved yet");
+  }
+
+  // Check if student is enrolled
+  const isEnrolled = courseData.enrolledStudent.includes(loggedStudent._id);
+  if(!isEnrolled){
+    throw new ApiError(403, "You are not enrolled in this course");
+  }
+
+  return res.status(200).json(new ApiResponse(200, courseData, "Course content retrieved successfully"));
+});
+
+// Update course thumbnail and price
+const updateCourseDetails = asyncHandler(async(req, res) => {
+  const { courseId } = req.params;
+  const { thumbnail, price } = req.body;
+  const loggedTeacher = req.teacher;
+
+  const courseData = await course.findById(courseId);
+  if(!courseData){
+    throw new ApiError(404, "Course not found");
+  }
+
+  if(courseData.enrolledteacher.toString() !== loggedTeacher._id.toString()){
+    throw new ApiError(403, "Not authorized to modify this course");
+  }
+
+  const updateData = {};
+  if(thumbnail !== undefined) updateData.thumbnail = thumbnail;
+  if(price !== undefined) {
+    if(isNaN(price) || price < 0){
+      throw new ApiError(400, "Price must be a valid positive number");
+    }
+    updateData.price = price;
+  }
+
+  const updatedCourse = await course.findByIdAndUpdate(
+    courseId,
+    updateData,
+    { new: true }
+  );
+
+  return res.status(200).json(new ApiResponse(200, updatedCourse, "Course updated successfully"));
+});
+
+export {getCourse, getcourseTeacher, addCourseTeacher, addCourseStudent, enrolledcourseSTD, enrolledcourseTeacher, addClass, stdEnrolledCoursesClasses, teacherEnrolledCoursesClasses, canStudentEnroll, addSection, addVideoToSection, getCourseContent, updateCourseDetails}
 
 
 

@@ -92,6 +92,10 @@ function StudentDashboard() {
           <NavLink to = {`/Student/Dashboard/${ID}/Courses`} className={({isActive}) => isActive ? "bg-white p-3 px-[4.61rem] text-center font-semibold text-[#4E84C1]" : "p-3 text-center font-semibold text-[#4E84C1]" }> 
           Courses
           </NavLink>
+
+          <NavLink to = {`/Student/Dashboard/${ID}/PaymentStatus`} className={({isActive}) => isActive ? "bg-white p-3 px-[4.61rem] text-center font-semibold text-[#4E84C1]" : "p-3 text-center font-semibold text-[#4E84C1]" }> 
+          Payment Status
+          </NavLink>
         </div>
 
       </div>
@@ -99,4 +103,4 @@ function StudentDashboard() {
   )
 }
 
-export default StudentDashboard 
+export default StudentDashboard
