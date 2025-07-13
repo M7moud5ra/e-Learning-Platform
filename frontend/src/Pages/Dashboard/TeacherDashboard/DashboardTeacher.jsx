@@ -97,8 +97,9 @@ function DashboardTeacher() {
   useEffect(() => {
     const getCourses = async () => {
       try {
-        const response = await fetch(`/api/course/Teacher/${ID}/enrolled`, {
+        const response = await fetch(`/api/course/teacher/${ID}/enrolled`, {
           method: "GET",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

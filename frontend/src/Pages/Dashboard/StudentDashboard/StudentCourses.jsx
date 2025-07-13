@@ -16,6 +16,7 @@ function StudentCourses() {
         try {
           const response = await fetch(`/api/course/student/${ID}/enrolled`, {
             method: 'GET',
+            credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
             },

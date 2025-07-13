@@ -43,8 +43,9 @@ function AddClass({ onClose }) {
   useEffect(() => {
     const getCourses = async () => {
       try {
-        const response = await fetch(`/api/course/Teacher/${ID}/enrolled`, {
+        const response = await fetch(`/api/course/teacher/${ID}/enrolled`, {
           method: 'GET',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -100,6 +101,7 @@ function AddClass({ onClose }) {
       try {
         const response = await fetch(`/api/course/${CourseId}/teacher/${ID}/add-class`, {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addClass, addCourseStudent, addCourseTeacher, canStudentEnroll, enrolledcourseSTD, enrolledcourseTeacher, getCourse, getcourseTeacher, stdEnrolledCoursesClasses, teacherEnrolledCoursesClasses, addSection, addVideoToSection, getCourseContent, updateCourseDetails } from "../controllers/course.controller.js";
+import { addClass, addCourseStudent, addCourseTeacher, canStudentEnroll, enrolledcourseSTD, enrolledcourseTeacher, getCourse, getcourseTeacher, stdEnrolledCoursesClasses, teacherEnrolledCoursesClasses, addSection, addVideoToSection, getCourseContent, getCourseContentTeacher, updateCourseDetails } from "../controllers/course.controller.js";
 import { authSTD } from "../middlewares/stdAuth.middleware.js";
 import { authTeacher } from "../middlewares/teacherAuth.middleware.js";
 
@@ -33,6 +33,8 @@ router.route("/:courseId/sections").post(authTeacher, addSection)
 router.route("/:courseId/sections/:sectionId/videos").post(authTeacher, addVideoToSection)
 
 router.route("/:courseId/content").get(authSTD, getCourseContent)
+
+router.route("/:courseId/content/teacher").get(authTeacher, getCourseContentTeacher)
 
 router.route("/:courseId/details").patch(authTeacher, updateCourseDetails)
 

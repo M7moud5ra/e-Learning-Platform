@@ -2,8 +2,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { PaymentRequest } from "../models/paymentRequest.model.js";
-import { Student } from "../models/student.model.js";
-import { Course } from "../models/course.model.js";
+import { student } from "../models/student.model.js";
+import { course } from "../models/course.model.js";
 
 // Create a payment request when student wants to enroll
 const createPaymentRequest = asyncHandler(async (req, res) => {
@@ -15,13 +15,13 @@ const createPaymentRequest = asyncHandler(async (req, res) => {
   }
 
   // Get student details
-  const student = await Student.findById(studentID);
+  const student = await student.findById(studentID);
   if (!student) {
     throw new ApiError(404, "Student not found");
   }
 
   // Check if course exists
-  const course = await Course.findById(courseID);
+  const course = await course.findById(courseID);
   if (!course) {
     throw new ApiError(404, "Course not found");
   }
@@ -30,11 +30,14 @@ const createPaymentRequest = asyncHandler(async (req, res) => {
   const existingRequest = await PaymentRequest.findOne({
     studentID,
     courseID,
-    status: "pending"
+    status: "pending",
   });
 
   if (existingRequest) {
-    throw new ApiError(400, "You already have a pending payment request for this course");
+    throw new ApiError(
+      400,
+      "You already have a pending payment request for this course"
+    );
   }
 
   // Create payment request
@@ -46,12 +49,18 @@ const createPaymentRequest = asyncHandler(async (req, res) => {
     studentEmail: student.Email,
     studentPhone: student.Phone || "Not provided",
     amount,
-    whatsappContactSent: true
+    whatsappContactSent: true,
   });
 
   return res
     .status(201)
-    .json(new ApiResponse(201, paymentRequest, "Payment request created successfully. Please contact admin via WhatsApp for payment."));
+    .json(
+      new ApiResponse(
+        201,
+        paymentRequest,
+        "Payment request created successfully. Please contact admin via WhatsApp for payment."
+      )
+    );
 });
 
 // Get all pending payment requests (for admin)
@@ -63,7 +72,13 @@ const getPendingPaymentRequests = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, pendingRequests, "Pending payment requests fetched successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        pendingRequests,
+        "Pending payment requests fetched successfully"
+      )
+    );
 });
 
 // Approve payment request and enroll student (for admin)
@@ -86,14 +101,14 @@ const approvePaymentRequest = asyncHandler(async (req, res) => {
   await paymentRequest.save();
 
   // Enroll student in course
-  const course = await Course.findById(paymentRequest.courseID);
+  const course = await course.findById(paymentRequest.courseID);
   if (!course) {
     throw new ApiError(404, "Course not found");
   }
 
   // Check if student is already enrolled
   const isAlreadyEnrolled = course.enrolledStudent.some(
-    student => student.toString() === paymentRequest.studentID.toString()
+    (student) => student.toString() === paymentRequest.studentID.toString()
   );
 
   if (!isAlreadyEnrolled) {
@@ -101,7 +116,7 @@ const approvePaymentRequest = asyncHandler(async (req, res) => {
     await course.save();
 
     // Update student's enrolled courses
-    const student = await Student.findById(paymentRequest.studentID);
+    const student = await student.findById(paymentRequest.studentID);
     if (student) {
       student.enrolledCourse.push(paymentRequest.courseID);
       await student.save();
@@ -110,7 +125,13 @@ const approvePaymentRequest = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, paymentRequest, "Payment request approved and student enrolled successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        paymentRequest,
+        "Payment request approved and student enrolled successfully"
+      )
+    );
 });
 
 // Reject payment request (for admin)
@@ -147,7 +168,13 @@ const getStudentPaymentRequests = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, paymentRequests, "Student payment requests fetched successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        paymentRequests,
+        "Student payment requests fetched successfully"
+      )
+    );
 });
 
 export {
@@ -155,5 +182,5 @@ export {
   getPendingPaymentRequests,
   approvePaymentRequest,
   rejectPaymentRequest,
-  getStudentPaymentRequests
+  getStudentPaymentRequests,
 };

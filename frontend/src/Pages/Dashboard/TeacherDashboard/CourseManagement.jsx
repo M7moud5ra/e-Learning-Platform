@@ -20,7 +20,7 @@ function CourseManagement() {
 
   const fetchCourseData = async () => {
     try {
-      const response = await fetch(`/api/course/${courseId}/content`, {
+      const response = await fetch(`/api/course/${courseId}/content/teacher`, {
         method: 'GET',
         credentials: 'include',
         headers: {

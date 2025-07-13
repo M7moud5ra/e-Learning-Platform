@@ -3,6 +3,7 @@ import {asyncHandler} from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js"; 
 import {ApiResponse} from "../utils/ApiResponse.js";
 import { Teacher } from "../models/teacher.model.js";
+import { student } from "../models/student.model.js";
 // Sendmail import removed - email verification disabled
 
 
@@ -634,6 +635,24 @@ const getCourseContent = asyncHandler(async(req, res) => {
   return res.status(200).json(new ApiResponse(200, courseData, "Course content retrieved successfully"));
 });
 
+// Get course with sections and videos (for course owner teacher)
+const getCourseContentTeacher = asyncHandler(async(req, res) => {
+  const { courseId } = req.params;
+  const loggedTeacher = req.teacher;
+
+  const courseData = await course.findById(courseId).populate('enrolledteacher', 'Firstname Lastname');
+  if(!courseData){
+    throw new ApiError(404, "Course not found");
+  }
+
+  // Check if teacher owns this course
+  if(courseData.enrolledteacher._id.toString() !== loggedTeacher._id.toString()){
+    throw new ApiError(403, "You are not authorized to access this course");
+  }
+
+  return res.status(200).json(new ApiResponse(200, courseData, "Course content retrieved successfully"));
+});
+
 // Update course thumbnail and price
 const updateCourseDetails = asyncHandler(async(req, res) => {
   const { courseId } = req.params;
@@ -667,7 +686,7 @@ const updateCourseDetails = asyncHandler(async(req, res) => {
   return res.status(200).json(new ApiResponse(200, updatedCourse, "Course updated successfully"));
 });
 
-export {getCourse, getcourseTeacher, addCourseTeacher, addCourseStudent, enrolledcourseSTD, enrolledcourseTeacher, addClass, stdEnrolledCoursesClasses, teacherEnrolledCoursesClasses, canStudentEnroll, addSection, addVideoToSection, getCourseContent, updateCourseDetails}
+export {getCourse, getcourseTeacher, addCourseTeacher, addCourseStudent, enrolledcourseSTD, enrolledcourseTeacher, addClass, stdEnrolledCoursesClasses, teacherEnrolledCoursesClasses, canStudentEnroll, addSection, addVideoToSection, getCourseContent, getCourseContentTeacher, updateCourseDetails}
 
 
 
