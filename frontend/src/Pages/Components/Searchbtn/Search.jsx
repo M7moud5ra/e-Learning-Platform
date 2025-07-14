@@ -92,6 +92,7 @@ function Search() {
       `/api/course/${courseName}/${id}/verify/student/${ID}`,
       {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

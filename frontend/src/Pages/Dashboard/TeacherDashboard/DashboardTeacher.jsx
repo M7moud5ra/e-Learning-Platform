@@ -30,8 +30,9 @@ function DashboardTeacher() {
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await fetch(`/api/Teacher/TeacherDocument/${ID}`, {
+        const response = await fetch(`/api/teacher/${ID}`, {
           method: "GET",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -74,6 +75,7 @@ function DashboardTeacher() {
       try {
         const response = await fetch(`/api/payment/teacher/${ID}/balance`, {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

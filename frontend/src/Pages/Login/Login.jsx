@@ -80,11 +80,14 @@ export default function Login() {
             }
           }
         }else if(responesData.data.user.Isapproved === "approved"){
-          if(userType === 'student'){
-            navigate(`/Student/Dashboard/${userid}/Search`)
-          }else if(userType === 'teacher'){
-            navigate(`/Teacher/Dashboard/${userid}/Home`)
-          }
+          // Store user data in localStorage for authentication state
+          localStorage.setItem('user', JSON.stringify({
+            id: userid,
+            type: userType,
+            name: `${responesData.data.user.Firstname} ${responesData.data.user.Lastname}`,
+            email: responesData.data.user.Email
+          }));
+          navigate('/')
         }else if(responesData.data.user.Isapproved === "reupload"){
           if(userType === 'teacher'){
             navigate(`/rejected/${userType}/${userid}`)

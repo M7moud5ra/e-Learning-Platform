@@ -312,6 +312,7 @@ function Popup({ onClose, subject }) {
     // Call API
     const response = await fetch(`/api/course/${subject}/create/${ID}`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Landing.css";
 import Classroom from "../../Images/Classroom.svg";
 import Plant from "../../Images/Plant.svg";
@@ -18,8 +18,41 @@ function Landing() {
   
   const [facList, setFacList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [allCourses, setAllCourses] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(false);
 
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      setUser(JSON.parse(userData))
+      fetchAllCourses()
+    }
+  }, [])
+
+  const fetchAllCourses = async () => {
+    setCoursesLoading(true)
+    try {
+      const response = await fetch('/api/course/all', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setAllCourses(data.data || [])
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error)
+    } finally {
+      setCoursesLoading(false)
+    }
+  }
 
   const handleSearch = ()=>{
     // console.log('working')
@@ -57,6 +90,86 @@ function Landing() {
   return (
     <>
     <Header/>
+    
+    {/* Courses Table for Logged-in Users */}
+    {user && (
+      <div className="courses-section bg-gray-50 py-8 mt-20">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Available Courses</h2>
+          {coursesLoading ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-2 text-gray-600">Loading courses...</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto shadow-lg rounded-lg">
+              <table className="min-w-full bg-white">
+                <thead className="bg-blue-600 text-white">
+                  <tr>
+                    <th className="py-3 px-6 text-left">Course Name</th>
+                    <th className="py-3 px-6 text-left">Teacher</th>
+                    <th className="py-3 px-6 text-left">Description</th>
+                    <th className="py-3 px-6 text-left">Price</th>
+                    <th className="py-3 px-6 text-left">Schedule</th>
+                    <th className="py-3 px-6 text-left">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allCourses.length > 0 ? (
+                    allCourses.map((course, index) => (
+                      <tr key={course._id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                        <td className="py-4 px-6 font-semibold text-gray-800">{course.coursename}</td>
+                        <td className="py-4 px-6 text-gray-600">
+                           {course.enrolledteacher?.name || 'N/A'}
+                         </td>
+                        <td className="py-4 px-6 text-gray-600">
+                          {course.description ? 
+                            (course.description.length > 100 ? 
+                              course.description.substring(0, 100) + '...' : 
+                              course.description
+                            ) : 'No description'
+                          }
+                        </td>
+                        <td className="py-4 px-6 text-green-600 font-semibold">
+                          {course.price ? `$${course.price}` : 'Free'}
+                        </td>
+                        <td className="py-4 px-6 text-gray-600">
+                          {course.schedule && course.schedule.length > 0 ? (
+                            <div className="text-sm">
+                              {course.schedule.map((sch, idx) => (
+                                <div key={idx}>
+                                  Day {sch.day}: {Math.floor(sch.starttime / 60)}:{(sch.starttime % 60).toString().padStart(2, '0')} - {Math.floor(sch.endtime / 60)}:{(sch.endtime % 60).toString().padStart(2, '0')}
+                                </div>
+                              ))}
+                            </div>
+                          ) : 'No schedule'}
+                        </td>
+                        <td className="py-4 px-6">
+                          {user.type === 'student' ? (
+                            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+                              Enroll
+                            </button>
+                          ) : (
+                            <span className="text-gray-500 text-sm">Teacher View</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="py-8 px-6 text-center text-gray-500">
+                        No courses available at the moment.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+    
     {/* Top Section */}
       <div className="top">
         <div className="left">

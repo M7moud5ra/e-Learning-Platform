@@ -75,9 +75,15 @@ const Signup = () => {
       setErr(responseData.message);
 
       if (response.ok) {
-        // Registration successful, you can redirect or do something else
+        // Registration successful, store user data and redirect to home
         console.log("Registration successful");
-        navigate('/varifyEmail');
+        localStorage.setItem('user', JSON.stringify({
+          id: responseData.data.user._id,
+          type: userType,
+          name: `${Firstname} ${Lastname}`,
+          email: Email
+        }));
+        navigate('/');
       } else if (response.status === 400) {
         // Handle specific validation errors returned by the server
         setErrors(responseData.errors || {});

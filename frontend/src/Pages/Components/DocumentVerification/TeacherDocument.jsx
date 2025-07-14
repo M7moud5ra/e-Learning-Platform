@@ -15,8 +15,9 @@ const TeacherDocument = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await fetch(`/api/teacher/TeacherDocument/${Data}`, {
+        const response = await fetch(`/api/teacher/${Data}`, {
           method: "GET",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -82,6 +83,7 @@ const TeacherDocument = () => {
     try {
       const response = await fetch(`/api/teacher/verification/${Data}`, {
         method: "POST",
+        credentials: "include",
         body: formDataObj,
       });
 

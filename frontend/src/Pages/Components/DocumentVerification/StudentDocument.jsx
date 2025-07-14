@@ -76,6 +76,7 @@ const StudentDocument = () => {
     try {
       const response = await fetch(`/api/student/verification/${Data}`, {
         method: "POST",
+        credentials: "include",
         body: formDataObj,
       });
 

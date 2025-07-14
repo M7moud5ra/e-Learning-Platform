@@ -136,13 +136,17 @@ const forApproval = asyncHandler(async (req, res) => {
 
   const studentsforApproval = await student.find({
     Isverified: true,
+    Isapproved: "pending",
+    Studentdetails: { $ne: null }
   });
 
   const teachersforApproval = await Teacher.find({
     Isverified: true,
+    Isapproved: "pending",
+    Teacherdetails: { $ne: null }
   });
 
-  if (!studentsforApproval && !teachersforApproval) {
+  if (!studentsforApproval.length && !teachersforApproval.length) {
     return res
       .status(200)
       .json(new ApiResponse(200, loggedAdmin, "No pending student or teacher"));

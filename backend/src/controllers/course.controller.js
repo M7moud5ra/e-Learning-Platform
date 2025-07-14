@@ -11,7 +11,7 @@ const getCourse = asyncHandler(async(req,res)=>{
 
     const courses = await course.find(
       {isapproved:true}
-    );
+    ).populate('enrolledteacher', 'name email');
 
     return res
     .status(200)
