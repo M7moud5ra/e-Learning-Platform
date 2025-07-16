@@ -52,6 +52,7 @@ const signup = asyncHandler(async (req, res) => {
     Password,
     Teacherdetails: null,
     Isverified: true, // Auto-verify since email verification is disabled
+    Isapproved: 'approved', // Auto-approve since verification is disabled
   });
 
   const createdTeacher = await Teacher.findById(newTeacher._id).select(

@@ -75,7 +75,7 @@ const Signup = () => {
       setErr(responseData.message);
 
       if (response.ok) {
-        // Registration successful, store user data and redirect to home
+        // Registration successful, store user data and redirect to appropriate dashboard
         console.log("Registration successful");
         localStorage.setItem('user', JSON.stringify({
           id: responseData.data.user._id,
@@ -83,7 +83,13 @@ const Signup = () => {
           name: `${Firstname} ${Lastname}`,
           email: Email
         }));
-        navigate('/');
+        
+        // Redirect to appropriate dashboard based on user type
+        if(userType === 'student'){
+          navigate(`/Student/Dashboard/${responseData.data.user._id}`)
+        } else if(userType === 'teacher'){
+          navigate(`/Teacher/Dashboard/${responseData.data.user._id}`)
+        }
       } else if (response.status === 400) {
         // Handle specific validation errors returned by the server
         setErrors(responseData.errors || {});

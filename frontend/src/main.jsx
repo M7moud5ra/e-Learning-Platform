@@ -62,6 +62,7 @@ const router = createBrowserRouter(
       <Route path='/admin/payment-requests/:data' element={<PaymentRequests/>}/>
       <Route path='/VarifyDoc/:type/:adminID/:ID' element={<VarifyDoc/>}/>
       <Route path='/Student/Dashboard/:ID' element={<StudentLayout/>}>
+        <Route index element={<StudentCourses/>}/>
         <Route path='/Student/Dashboard/:ID/Search' element={<SearchTeacher/>}/>
         <Route path='/Student/Dashboard/:ID/Classes' element={<StudentClasses/>}/>
         <Route path='/Student/Dashboard/:ID/Courses' element={<StudentCourses/>}/>
@@ -69,6 +70,7 @@ const router = createBrowserRouter(
         <Route path='/Student/Dashboard/:ID/CourseContent/:courseId' element={<CourseContent/>}/>
       </Route>
       <Route path='/Teacher/Dashboard/:ID' element={<TeacherLayout/>}>
+        <Route index element={<TeacherCourses/>}/>
         <Route path='/Teacher/Dashboard/:ID/Home' element={<DashboardTeacher/>}/>
         <Route path='/Teacher/Dashboard/:ID/Classes' element={<TeacherClasses/>}/>
         <Route path='/Teacher/Dashboard/:ID/Courses' element={<TeacherCourses/>}/>

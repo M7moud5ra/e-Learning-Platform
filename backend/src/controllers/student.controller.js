@@ -54,6 +54,7 @@ const signup = asyncHandler(async (req, res) => {
     Password,
     Studentdetails: null,
     Isverified: true, // Auto-verify since email verification is disabled
+    Isapproved: 'approved', // Auto-approve since verification is disabled
   });
 
   const createdStudent = await student
